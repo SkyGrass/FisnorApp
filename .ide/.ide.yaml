@@ -19,7 +19,7 @@ workspace:
       - npm config set registry https://registry.npmmirror.com
       - npm install
   services:
-    boathouse-calculator:
+    wmsApp:
       image: registry.cn-hangzhou.aliyuncs.com/smartide/smartide-node-v2-vscode:all-version
       restart: always
       environment:
