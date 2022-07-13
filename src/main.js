@@ -8,8 +8,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import './utils/storage'
-import { mix } from './mixins'
-Vue.mixin(mix)
+import { title } from './mixins/title'
+Vue.mixin(title)
 
 // 设置 js中可以访问 $cdn
 import { $cdn } from '@/config'

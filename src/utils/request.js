@@ -24,12 +24,13 @@ service.interceptors.request.use(
     config.headers = {
       'Content-Type': 'multipart/form-data'
     }
-    const { accountId, key } = store.getters
+    const { accountId, key, loginUserId } = store.getters
     config.data = {
       MethodName: config.url,
       JSON: JSON.stringify(
         Object.assign({}, config.data, {
-          cKey: key
+          cKey: key,
+          cUser_Id: loginUserId
         })
       ),
       AccID: accountId
@@ -56,7 +57,13 @@ service.interceptors.response.use(
       }
       return Promise.reject(res || 'error')
     } else {
-      return Promise.resolve(res)
+      const { Data, Message, Result } = res
+      if (Result == 'Y') {
+        return Promise.resolve(res)
+      } else {
+        Toast.fail(Message)
+        return Promise.reject({ Message } || 'error')
+      }
     }
   },
   error => {

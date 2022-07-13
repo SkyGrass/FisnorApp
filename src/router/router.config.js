@@ -12,9 +12,19 @@ export const constantRouterMap = [
     meta: { title: '主页', keepAlive: false }
   },
   {
-    path: '/label_print',
-    name: 'label_print',
-    component: () => import('@/views/label_print'),
+    path: '/pap',
+    name: 'pap',
+    component: () => import('@/views/pap'),
+    meta: {
+      title: '入库标签打印',
+      keepAlive: true,
+      scrollTop: 0
+    }
+  },
+  {
+    path: '/pap_form',
+    name: 'pap_form',
+    component: () => import('@/views/pap/form'),
     meta: {
       title: '入库标签打印',
       keepAlive: false

@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <div class="app-container">
-      <keep-alive v-if="$route.meta.keepAlive">
-        <router-view></router-view>
+      <keep-alive>
+        <router-view v-if="$route.meta.keepAlive" :key="key"></router-view>
       </keep-alive>
-      <router-view v-else></router-view>
+      <router-view v-if="!$route.meta.keepAlive" :key="key"></router-view>
 
       <redblue ref="redblue" />
     </div>
@@ -22,7 +22,11 @@ export default {
       isForbidden: true
     }
   },
-  computed: {},
+  computed: {
+    key() {
+      return this.$route.fullPath
+    }
+  },
   watch: {},
   methods: {},
   created() {

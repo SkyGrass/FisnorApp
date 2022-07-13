@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { getMenu } from '@/api/home'
 import redblue from '@/components/redblue'
 import { mapGetters } from 'vuex'
 export default {
@@ -33,14 +34,14 @@ export default {
   data() {
     return {
       list: [
-        { id: 'a', icon: 'icon_list.png', label: '入库标签打印', redblue: false, path: 'label_print' },
-        { id: 'b', icon: 'icon_list.png', label: '采购入库', redblue: true, path: 'in' },
-        { id: 'c', icon: 'icon_list.png', label: '仓库调拨[参照申请]', redblue: false, path: 'transfer' },
-        { id: 'd', icon: 'icon_list.png', label: '产成品入库', redblue: true, path: 'pin' },
-        { id: 'e', icon: 'icon_list.png', label: '销售发货', redblue: true, path: 'sout' },
-        { id: 'f', icon: 'icon_list.png', label: '标签拆箱', redblue: false, path: '' },
-        { id: 'g', icon: 'icon_list.png', label: '磨具查询', redblue: false, path: 'q1' },
-        { id: 'h', icon: 'icon_list.png', label: '库存查询', redblue: false, path: 'q2' }
+        { id: 'a', icon: 'icon_list.png', label: '入库标签打印', path: 'pap' },
+        { id: 'b', icon: 'icon_list.png', label: '采购入库', path: 'in' },
+        { id: 'c', icon: 'icon_list.png', label: '仓库调拨[参照申请]', path: 'transfer' },
+        { id: 'd', icon: 'icon_list.png', label: '产成品入库', path: 'pin' },
+        { id: 'e', icon: 'icon_list.png', label: '销售发货', path: 'sout' },
+        { id: 'f', icon: 'icon_list.png', label: '标签拆箱', path: '' },
+        { id: 'g', icon: 'icon_list.png', label: '磨具查询', path: 'q1' },
+        { id: 'h', icon: 'icon_list.png', label: '库存查询', path: 'q2' }
       ]
     }
   },
@@ -57,13 +58,12 @@ export default {
   },
   methods: {
     redirect({ path }) {
-      // if (!redblue) {
       this.$router.push({
-        name: path
+        path: path,
+        query: {
+          t: new Date() * 1
+        }
       })
-      // } else {
-      //   this.$refs.redblue.open(path)
-      // }
     }
   },
   mounted() {}

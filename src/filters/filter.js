@@ -35,3 +35,7 @@ function padLeftZero(str) {
 export function hidePhone(phone) {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
 }
+
+export function friendly(value) {
+  if (value == null || value == void 0 || value == '' || value == 'null' || value == 'undefined') return '-'
+}

@@ -96,3 +96,17 @@ export function param2Obj(url) {
       '"}'
   )
 }
+
+export function newGuid() {
+  let t = 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+  const t1 = t.substring(0, 8)
+  const t2 = t.substring(8, 12)
+  const t3 = t.substring(12, 16)
+  const t4 = t.substring(16, 20)
+  const t5 = t.substring(20)
+  return [t1, t2, t3, t4, t5].join('-')
+}

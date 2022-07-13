@@ -33,6 +33,12 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
+  if (from.meta.keepAlive) {
+    const $content = document.querySelector('.list') // 列表的外层容器
+    const scrollTop = $content ? $content.scrollTop : 0
+    console.log('scrollTop', scrollTop)
+    from.meta.scrollTop = scrollTop
+  }
   next()
   // if (freePath.findIndex(f => f == to.path) < 0 && (getToken() == '' || getToken() == null)) {
   //   next({ replace: true, path: '/login', query: { reason: 'timeout' } })

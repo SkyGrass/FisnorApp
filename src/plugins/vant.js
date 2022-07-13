@@ -45,7 +45,8 @@ import {
   Collapse,
   CollapseItem,
   SwipeCell,
-  Checkbox
+  Checkbox,
+  SubmitBar
 } from 'vant'
 Vue.use(Button)
 Vue.use(Cell)
@@ -86,3 +87,4 @@ Vue.use(RadioGroup).use(Radio)
 Vue.use(Collapse).use(CollapseItem)
 Vue.use(SwipeCell)
 Vue.use(Checkbox)
+Vue.use(SubmitBar)
