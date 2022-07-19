@@ -6,14 +6,14 @@
         <van-field name="redblue" label="红蓝字">
           <template #input>
             <van-radio-group v-model="form.redblue" direction="horizontal">
-              <van-radio name="0">蓝字</van-radio>
-              <van-radio name="1">红字</van-radio>
+              <van-radio name="1" checked-color="#008577">蓝字</van-radio>
+              <van-radio name="0" checked-color="#008577">红字</van-radio>
             </van-radio-group>
           </template>
         </van-field>
         <div style="margin: 5px; text-align: right">
           <van-button style="margin-right: 20px" @click="doCancel">取消</van-button>
-          <van-button type="info" @click="onSubmit">确定</van-button>
+          <van-button color="#008577" type="info" @click="onSubmit">确定</van-button>
         </div>
       </van-form>
     </van-popup>
@@ -24,7 +24,7 @@ export default {
   name: `redblue`,
   data() {
     return {
-      form: { redblue: '0' },
+      form: { redblue: '1' },
       target: '',
       show: false
     }
@@ -55,12 +55,12 @@ export default {
     show1(newV, oldV) {
       this.show = newV
       if (newV) {
-        this.form.redblue = '0'
+        this.form.redblue = '1'
       }
     }
   },
   mounted() {
-    this.form.redblue = '0'
+    this.form.redblue = '1'
   }
 }
 </script>

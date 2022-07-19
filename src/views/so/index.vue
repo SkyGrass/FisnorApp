@@ -52,7 +52,7 @@
             >
               <li style="padding: 2px">日期：{{ source.dDate }}</li>
               <li style="padding: 2px">单号：{{ source.cCode }}</li>
-              <li style="padding: 2px">供应商：{{ source.cVenCode }}||{{ source.cVenName }}</li>
+              <li style="padding: 2px">客户：{{ source.cCusCode }}||{{ source.cCusName }}</li>
             </ul>
           </van-list>
         </div>
@@ -82,9 +82,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { getPuArrivalHead } from '@/api/pap'
+import { getDispatchHead } from '@/api/so'
 export default {
-  name: `in`,
+  name: `so`,
   data() {
     return {
       keyword: '',
@@ -128,7 +128,7 @@ export default {
   methods: {
     onLoad() {
       this.sourceList = []
-      getPuArrivalHead(
+      getDispatchHead(
         Object.assign(
           {},
           { dBeginDate: this.startDateStr, dEndDate: this.endDateStr, FRob: this.rob },
@@ -160,7 +160,7 @@ export default {
     },
     onChoose(row) {
       this.$router.push({
-        name: 'in_form',
+        name: 'so_form',
         query: Object.assign({}, row, {
           bRob: this.rob
         })

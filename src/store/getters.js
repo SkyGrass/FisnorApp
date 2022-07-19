@@ -9,6 +9,10 @@ const getters = {
   model: state => state.app.model,
 
   showRb: state => state.runtime.showRedBlue,
-  targetUrl: state => state.runtime.targetUrl
+  targetUrl: state => state.runtime.targetUrl,
+
+  addRoutes: state => state.app.menus,
+
+  wareHouseList: state => state.base.wareHouseList
 }
 export default getters

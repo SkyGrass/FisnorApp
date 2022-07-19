@@ -41,7 +41,7 @@
           </van-col>
         </van-row>
         <div class="list">
-          <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+          <van-list v-model="loading" :finished="finished" @load="onLoad">
             <!-- <van-cell v-for="item in list" :key="item" :title="item" /> -->
             <listitem v-for="(item, index) in list" :key="index" :source="item" />
           </van-list>
@@ -109,7 +109,7 @@ export default {
       this.show2 = false
       this.endDate = this.formatDate(date)
     },
-    stopKeyboard() {}, 
+    stopKeyboard() {}
   },
   mounted() {
     this.$nextTick(() => {

@@ -50,16 +50,17 @@
               :source="source"
               @click="onChoose(source)"
             >
-              <li style="padding: 2px">日期：{{ source.dDate }}</li>
-              <li style="padding: 2px">单号：{{ source.cCode }}</li>
-              <li style="padding: 2px">供应商：{{ source.cVenCode }}||{{ source.cVenName }}</li>
+              <li style="padding: 2px">单号：{{ source.cTVCode }}</li>
+              <li style="padding: 2px; display: inline-flex; justify-content: space-between">
+                <div>调出仓库：{{ source.cOWhName }}</div>
+                <div>调入仓库：{{ source.cIWhName }}</div>
+              </li>
+              <li style="padding: 2px">日期：{{ source.dTVDate }}</li>
             </ul>
           </van-list>
         </div>
       </div>
     </van-form>
-    <!-- <van-calendar v-model="show1" /> -->
-    <!-- <van-calendar v-model="show2" @confirm="onConfirm2" /> -->
     <van-popup v-model="show1" position="bottom" :style="{ height: '50%' }">
       <van-datetime-picker
         v-model="form.dBeginDate"
@@ -82,9 +83,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { getPuArrivalHead } from '@/api/pap'
+import { getAppTransHead } from '@/api/trans'
 export default {
-  name: `in`,
+  name: `trans`,
   data() {
     return {
       keyword: '',
@@ -95,8 +96,7 @@ export default {
       sourceList: [],
       loading: false,
       finished: false,
-      readonly: false,
-      rob: 0
+      readonly: false
     }
   },
   computed: {
@@ -128,10 +128,10 @@ export default {
   methods: {
     onLoad() {
       this.sourceList = []
-      getPuArrivalHead(
+      getAppTransHead(
         Object.assign(
           {},
-          { dBeginDate: this.startDateStr, dEndDate: this.endDateStr, FRob: this.rob },
+          { dBeginDate: this.startDateStr, dEndDate: this.endDateStr },
           {
             cFilter: this.keyword == '' ? '' : JSON.stringify({ cCode: this.keyword })
           }
@@ -160,16 +160,12 @@ export default {
     },
     onChoose(row) {
       this.$router.push({
-        name: 'in_form',
-        query: Object.assign({}, row, {
-          bRob: this.rob
-        })
+        name: 'trans_form',
+        query: Object.assign({}, row)
       })
     }
   },
-  created() {
-    this.rob = this.$route.query.redblue
-  },
+  created() {},
   mounted() {
     this.$nextTick(() => {
       if (this.$refs.keyword != void 0) {

@@ -24,13 +24,15 @@ service.interceptors.request.use(
     config.headers = {
       'Content-Type': 'multipart/form-data'
     }
-    const { accountId, key, loginUserId } = store.getters
+    const { accountId, key, loginUserId, pwd, accountDate } = store.getters
     config.data = {
       MethodName: config.url,
       JSON: JSON.stringify(
         Object.assign({}, config.data, {
           cKey: key,
-          cUser_Id: loginUserId
+          cUser_Id: loginUserId,
+          cPassword: pwd,
+          dLoginDate: accountDate
         })
       ),
       AccID: accountId

@@ -55,6 +55,7 @@
               :disabled="cacheList.length <= 0"
               button-text="提交"
               @submit="onSave"
+              :loading="submitLoading"
             />
           </van-list>
         </div>
@@ -75,7 +76,7 @@
         </van-field>
         <div style="margin: 5px; text-align: right">
           <van-button style="margin-right: 20px" @click="show = false">取消</van-button>
-          <van-button type="info" @click="onSubmit">确定</van-button>
+          <van-button color="#008577" type="info" @click="onSubmit">确定</van-button>
         </div>
       </van-form>
     </van-popup>
@@ -97,7 +98,8 @@ export default {
       finished: false,
       show: false,
       curRow: {},
-      cacheList: []
+      cacheList: [],
+      submitLoading: false
     }
   },
   created() {
@@ -155,6 +157,7 @@ export default {
           message: '确定要提交记录吗?'
         })
         .then(() => {
+          this.submitLoading = true
           const list = this.cacheList.map(m => {
             return {
               cSourceBillID: m.ID,
@@ -167,15 +170,17 @@ export default {
           savePuArrival({ cSign: newGuid(), Entry: list })
             .then(({ Data, Message }) => {
               Toast.success({
-                message: Message,
-                onClose() {
+                message: '提交成功!',
+                onClose: () => {
+                  this.submitLoading = false
                   this.onLoad()
                   this.cacheList = []
+                  this.active = 0
                 }
               })
             })
             .catch(({ Message }) => {
-              //Toast.fail(Message)
+              this.submitLoading = false
             })
         })
         .catch(e => {})

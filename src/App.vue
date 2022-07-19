@@ -12,6 +12,7 @@
 </template>
 <script>
 import redblue from '@/components/redblue'
+import { getWarehouse } from './api/base'
 export default {
   name: 'App',
   components: { redblue },
@@ -30,11 +31,12 @@ export default {
   watch: {},
   methods: {},
   created() {
-    let { query } = this.$route
-    if (Object.keys(query).length < 2) {
+    let { query, path } = this.$route
+    if (path != '/home' || Object.keys(query).length <= 0) {
       query = MyLStorage.get('model')
     }
     this.$store.dispatch('setModel', query)
+
     this.isForbidden = Object.keys(query).length <= 0
   },
   mounted() {}

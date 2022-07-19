@@ -1,6 +1,6 @@
 <template lang="">
   <div class="container">
-    <van-form @submit="onSubmit" label-width="30px">
+    <van-form @submit="onSubmit" label-width="50px">
       <div class="top">
         <van-field
           clearable
@@ -8,7 +8,6 @@
           name="keyword"
           label="条件"
           ref="keyword"
-          :readonly="readonly"
           placeholder="扫描或输入关键词回车查询"
           @keyup.enter="onSubmit"
         />
@@ -20,7 +19,7 @@
               label="开始"
               name="dBeginDate"
               is-link
-              placeholder="选择开始时间"
+              placeholder="开始时间"
               :value="startDateStr"
               input-align="right"
               @click="show1 = true"
@@ -32,7 +31,7 @@
               label="结束"
               name="dEndDate"
               is-link
-              placeholder="选择结束时间"
+              placeholder="结束时间"
               :value="endDateStr"
               input-align="right"
               @click="show2 = true"
@@ -41,14 +40,24 @@
           </van-col>
         </van-row>
         <div class="list">
-          <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
-            <listitem v-for="(item, index) in list" :key="item.ID" :source="item" @choose="onChoose" />
+          <van-empty class="custom-image" description="没有记录" v-if="sourceList.length <= 0" />
+          <van-list v-model="loading" :finished="finished" @load="onLoad">
+            <ul
+              style="padding: 5px; font-size: 14px"
+              class="van-hairline--bottom"
+              v-for="(source, index) in sourceList"
+              :key="source.ID"
+              :source="source"
+              @click="onChoose(source)"
+            >
+              <li style="padding: 2px">日期：{{ source.dDate }}</li>
+              <li style="padding: 2px">单号：{{ source.cCode }}</li>
+              <li style="padding: 2px">供应商：{{ source.cVenCode }}||{{ source.cVenName }}</li>
+            </ul>
           </van-list>
         </div>
       </div>
     </van-form>
-    <!-- <van-calendar v-model="show1" /> -->
-    <!-- <van-calendar v-model="show2" @confirm="onConfirm2" /> -->
     <van-popup v-model="show1" position="bottom" :style="{ height: '50%' }">
       <van-datetime-picker
         v-model="form.dBeginDate"
@@ -71,13 +80,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import listitem from './listitem'
-import { keyboard } from '@/mixins/keyboard'
 import { getPuArrivalHead } from '@/api/pap'
 export default {
   name: `pap`,
-  components: { listitem },
-  mixins: [keyboard],
   data() {
     return {
       keyword: '',
@@ -85,7 +90,7 @@ export default {
       maxDate: new Date(),
       show1: false,
       show2: false,
-      list: [],
+      sourceList: [],
       loading: false,
       finished: false,
       readonly: false
@@ -118,9 +123,8 @@ export default {
     }
   },
   methods: {
-    open() {},
     onLoad() {
-      this.list = []
+      this.sourceList = []
       getPuArrivalHead(
         Object.assign(
           {},
@@ -131,7 +135,7 @@ export default {
         )
       )
         .then(({ Data }) => {
-          this.list = Data
+          this.sourceList = Data
         })
         .catch(err => {})
       this.loading = false
@@ -154,7 +158,7 @@ export default {
     onChoose(row) {
       this.$router.push({
         name: 'pap_form',
-        query: row
+        query: { ID: row.ID }
       })
     }
   },
@@ -175,7 +179,7 @@ export default {
   },
   activated() {
     const scrollTop = this.$route.meta.scrollTop
-    const $content = document.querySelector('.list')
+    const $content = document.querySelector('.sourceList')
     if (scrollTop && $content) {
       $content.scrollTop = scrollTop
     }

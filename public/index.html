@@ -29,6 +29,10 @@
       function initModel(model) {
         console.log(model)
       }
+      function getCurEle() {
+        var dom = window.localStorage.getItem('curEle')
+        return Number(dom)
+      }
     </script>
     <noscript>
       <strong

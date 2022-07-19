@@ -55,3 +55,11 @@ export function getRdStyle(data) {
     data
   })
 }
+// 获取箱号信息
+export function getBox(data) {
+  return request({
+    url: 'GetBox',
+    method: 'post',
+    data
+  })
+}
