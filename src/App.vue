@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="app-container">
+    <div class="app-container" style="padding-bottom: 50px;">
       <keep-alive>
         <router-view v-if="$route.meta.keepAlive" :key="key"></router-view>
       </keep-alive>
@@ -31,6 +31,7 @@ export default {
   watch: {},
   methods: {},
   created() {
+    console.log('created')
     let { query, path } = this.$route
     if (path != '/home' || Object.keys(query).length <= 0) {
       query = MyLStorage.get('model')
@@ -46,15 +47,5 @@ export default {
 #app {
   height: 100vh;
   overflow: hidden;
-}
-.van-enter-active-class,
-.van-leave-active-class {
-  transition-property: background-color, transform;
-}
-
-.van-enter-class,
-.van-leave-to-class {
-  background-color: red;
-  transform: rotate(-360deg) translate3d(-100%, -100%, 0);
 }
 </style>

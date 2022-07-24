@@ -38,17 +38,18 @@
     <van-tabs v-model="active" color="#008577">
       <van-tab title="扫描页">
         <div class="list0" id="list0">
-          <van-form label-width="70px" ref="postForm">
+          <div ref="postForm" class="postForm inputForm">
             <van-field
               type="text"
               name="cPosName"
-              label="仓位"
+              label="货位"
               ref="ele_cPosName"
               v-model="form.cPosName"
               autocomplete="off"
-              placeholder="扫描或录入仓位"
+              placeholder="扫描或录入货位"
               v-show="control.usePos"
-              @focus="onFocus(0)"
+              id="ele_cPosName"
+              @focus="onFocus('ele_cPosName')"
               @keyup.enter="queryPos"
             ></van-field>
 
@@ -59,9 +60,18 @@
               ref="ele_cBarcode"
               v-model="form.cBarcode"
               autocomplete="off"
-              placeholder="扫描或录入存货条码"
-              @focus="onFocus(0)"
+              placeholder="扫描或录入箱号条码"
+              id="ele_cBarcode"
+              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
+            ></van-field>
+            <van-field
+              name="cBoxNO"
+              label="箱号"
+              ref="ele_cBoxNO"
+              v-model="form.cBoxNO"
+              readonly
+              placeholder="箱号"
             ></van-field>
             <van-field
               name="cInvCode"
@@ -100,6 +110,7 @@
               label="批号"
               ref="ele_cBatch"
               v-model="form.cBatch"
+              v-show="showBatch"
               readonly
               placeholder="批号"
             ></van-field>
@@ -121,10 +132,11 @@
             ></van-field>
             <van-field
               name="iStockQuantity"
-              label="库存件数"
+              label="库存数量"
               ref="ele_iStockQuantity"
               v-model="form.iStockQuantity"
-              v-show="showStock"
+              placeholder="库存数量"
+              readonly
             ></van-field>
             <van-field
               type="number"
@@ -132,14 +144,19 @@
               label="数量"
               ref="ele_iQuantity"
               v-model="form.iQuantity"
-              class="iQuantity"
-              @focus="onFocus(2)"
-              @keyup.enter="inputQuantity"
+              id="ele_iQuantity"
+              readonly
             ></van-field>
-          </van-form>
+          </div>
           <div class="btns">
-            <van-button class="btn" size="small" @click="doClear">取消</van-button>
-            <van-button class="btn" size="small" color="#008577" type="info" @click="onSubmit" :disabled="forbiddenSub"
+            <van-button class="btn" size="small" @click="doClear">清空</van-button>
+            <van-button
+              class="btn"
+              size="small"
+              color="#008577"
+              type="info"
+              @click="inputQuantity"
+              :disabled="forbiddenSub"
               >确定</van-button
             >
           </div>
@@ -157,6 +174,7 @@
               @click="onDelete(index)"
             >
               <li style="padding: 2px">行号：{{ item.iRowno }}</li>
+              <li style="padding: 2px">箱号{{ item.cBoxNO }}</li>
               <li style="padding: 2px">存货编码：{{ item.cInvCode }}</li>
               <li style="padding: 2px">存货名称：{{ item.cInvName }}</li>
               <li style="padding: 2px">规格型号：{{ item.cInvStd }}</li>
@@ -226,7 +244,7 @@ import { newGuid, floatAdd, floatSub } from '@/utils'
 import warehouse from '@/components/warehouse'
 import deptpartment from '@/components/deptpartment'
 import rd from '@/components/rd'
-import { getWarehouse, getDepartment, getRdStyle, getPosition, getInventory } from '@/api/base'
+import { getWarehouse, getDepartment, getRdStyle, getPosition, getBox } from '@/api/base'
 import dayjs from 'dayjs'
 export default {
   name: `so_form`,
@@ -260,14 +278,16 @@ export default {
         rdList: []
       },
       control: {
-        usePos: true,
-        useBatch: true,
-        useQuality: true,
+        usePos: false,
+        useBatch: false,
+        useQuality: false,
         groupType: 1
       },
       cSign: newGuid(),
       form: {
         iRowno: '',
+
+        cBoxNO: '',
 
         cPosCode: '',
         cPosName: '',
@@ -305,7 +325,7 @@ export default {
   methods: {
     onLoad() {
       this.sourceList = []
-      getDispatch({ cFilter: "ID='" + this.queryForm.ID + "'", FROB: this.queryForm.bRob })
+      getDispatch({ cFilter: this.queryForm.ID, FROB: this.queryForm.bRob })
         .then(({ Data }) => {
           this.sourceList = Data
         })
@@ -331,34 +351,44 @@ export default {
     },
     onSubmit() {
       // 红字检查库存
-      if (this.queryForm.bRob == '0') {
-        if (!this.checkStock()) {
-          this.form.iQuantity = ''
-          this.curEle = 'ele_iQuantity'
-          return this.$toast({
-            type: 'fail',
-            message: '当前库存量不够!',
-            onOpened: () => {
-              this.setFocus(true)
-            }
-          })
-        }
+      if (!this.checkStock()) {
+        this.curEle = 'ele_cBarcode'
+        return this.$toast({
+          type: 'fail',
+          message: '当前库存量不够!',
+          onOpened: () => {
+            this.setFocus(true)
+          }
+        })
       }
-      const position = this.cacheList.findIndex(f => {
-        return (
-          f.cSourceBillID == this.form.cSourceBillID &&
-          f.cSourceBillEntryID == this.form.cSourceBillEntryID &&
-          f.cInvCode == this.form.cInvCode &&
-          f.cBatch == this.form.cBatch
-        )
+
+      const exist = this.cacheList.filter(f => {
+        return f.cBoxNO == this.form.cBoxNO
       })
-      if (position > -1) {
-        let r = this.cacheList[position]
-        r.iQuantity = floatAdd(r.iQuantity, this.form.iQuantity)
-        this.$set(this.cacheList, position, Object.assign({}, r))
-      } else {
-        this.cacheList.push(Object.assign({}, this.form))
+      if (exist.length > 0) {
+        return this.$toast({
+          type: 'fail',
+          message: '当前箱号已扫描!',
+          onOpened: () => {
+            this.form.cBarcode = ''
+            this.setFocus()
+          }
+        })
       }
+
+      if (!this.checkPlan()) {
+        this.curEle = 'ele_iQuantity'
+        return this.$toast({
+          type: 'fail',
+          message: '数量超过源单!',
+          onOpened: () => {
+            this.setFocus(true)
+          }
+        })
+      }
+
+      this.cacheList.push(Object.assign({}, this.form))
+
       this.clearForm()
     },
     onSave() {
@@ -399,6 +429,7 @@ export default {
               {
                 Entry: this.cacheList.map(m => {
                   return {
+                    cBoxNO: m.cBoxNO,
                     cSourceBillID: m.cSourceBillID,
                     cSourceBillNo: m.cSourceBillNo,
                     cSourceBillEntryID: m.cSourceBillEntryID,
@@ -423,10 +454,11 @@ export default {
                 message: '提交成功!',
                 onClose: () => {
                   this.submitLoading = false
-                  this.onLoad()
-                  this.cacheList = []
-                  this.active = 0
-                  this.cSign = newGuid()
+                  this.$router.go(-1)
+                  // this.onLoad()
+                  // this.cacheList = []
+                  // this.active = 0
+                  // this.cSign = newGuid()
                 }
               })
             })
@@ -438,21 +470,15 @@ export default {
     },
     openWarehouse() {
       if (this.forbidden) {
-        return this.$toast({ type: 'fail', message: '已经有扫描记录,禁止' })
+        return this.$toast({ type: 'fail', message: '已经有扫描记录,禁止操作!' })
       }
       this.$refs.warehouse.open()
     },
     openDeptpartment() {
-      if (this.forbidden) {
-        return this.$toast({ type: 'fail', message: '' })
-      }
       this.$refs.deptpartment.open()
     },
     openRd() {
-      if (this.forbidden) {
-        return this.$toast({ type: 'fail', message: '' })
-      }
-      this.$refs.rd.open()
+      this.$refs.rd.open(0)
     },
     pickWarehouse({ cWhCode, cWhName, bWhPos }) {
       this.headForm.cWhName = cWhName
@@ -494,6 +520,16 @@ export default {
       }
     },
     queryPos() {
+      if (this.control.usePos && this.form.cPosName == '') {
+        return this.$toast({
+          type: 'fail',
+          message: '请先扫描货位',
+          onOpened: () => {
+            this.form.cPosName = ''
+            this.setFocus()
+          }
+        })
+      }
       getPosition({ cWhCode: this.cWhCode, cPosCode: this.form.cPosName })
         .then(({ Data }) => {
           if (Data.length > 0) {
@@ -528,37 +564,54 @@ export default {
       if (this.form.cBarcode == '') {
         return this.$toast({
           type: 'fail',
-          message: '请先扫描存货条码',
+          message: '请先扫描箱号条码',
           onOpened: () => {
             this.form.cBarcode = ''
             this.setFocus()
           }
         })
       }
-      getInventory({ cBarcode: this.form.cBarcode, cWhCode: this.cWhCode, cPosCode: this.form.cPosCode })
+      const exist = this.cacheList.filter(f => {
+        return f.cBoxNO == this.form.cBarcode || f.cBoxNO == this.form.cBoxNO
+      })
+      if (exist.length > 0) {
+        return this.$toast({
+          type: 'fail',
+          message: '当前箱号已扫描!',
+          onOpened: () => {
+            this.form.cBarcode = ''
+            this.setFocus()
+          }
+        })
+      }
+
+      // getInventory({ cBarcode: this.form.cBarcode, cWhCode: this.cWhCode, cPosCode: this.form.cPosCode })
+      getBox({ FBoxNo: this.form.cBarcode, cWhCode: this.cWhCode, cType: '2' })
         .then(({ Data }) => {
           if (Data.length > 0) {
-            const _cInvCode = this.form.cBarcode.split(';')[2]
-            const row = this.sourceList.filter(f => {
-              return f.cInvCode == _cInvCode
-            })[0]
-            if (row != void 0) {
-              const {
-                bInvBatch,
-                bInvQuality,
-                cInvCode,
-                cInvName,
-                cInvStd,
-                cComUnitCode,
-                cComUnitName,
-                cBatch,
-                iMassDate,
-                cMassUnit,
-                iChangRate,
-                dMdate,
-                iStockQuantity,
-                iGroupType
-              } = Data[0]
+            const {
+              bInvBatch,
+              bInvQuality,
+              cInvCode,
+              cInvName,
+              cInvStd,
+              cComUnitCode,
+              cComUnitName,
+              cBatch,
+              iMassDate,
+              cMassUnit,
+              iChangRate,
+              dMdate,
+              iStockQuantity,
+              iGroupType,
+              iQuantity
+            } = Data[0]
+
+            const rows = this.sourceList.filter(f => {
+              return f.cInvCode == cInvCode
+            })
+            if (rows.length > 0) {
+              const row = rows[0]
 
               this.control.useBatch = bInvBatch //是否批次管理
               this.control.useQuality = bInvQuality //是否保质期管理
@@ -570,7 +623,7 @@ export default {
               this.form.cComUnitCode = cComUnitCode
               this.form.cComUnitName = cComUnitName
               this.form.cBatch = cBatch
-
+              this.form.iQuantity = iQuantity
               this.form.iStockQuantity = iStockQuantity
 
               //计算保质期
@@ -588,15 +641,15 @@ export default {
                 }
               }
 
+              this.form.cBoxNO = this.form.cBarcode
               this.form.iChangRate = iChangRate
               //todo 多计量计算
-
               this.form.iNum = 0
 
-              const rows = this.cacheList.filter(f => {
-                return f.cInvCode == _cInvCode
+              const cacheRows = this.cacheList.filter(f => {
+                return f.cInvCode == cInvCode
               })
-              const total = rows
+              const total = cacheRows
                 .map(f => f.iQuantity)
                 .reduce((sum, item) => {
                   return floatAdd(sum, item)
@@ -604,15 +657,20 @@ export default {
               this.form.iCommitQuantity = total
 
               this.form.iRowno = row.iRowno
-              this.form.iPlanQuantity = row.iQuantity
+              this.form.iPlanQuantity = row.iQuantity2
 
               this.form.cSourceBillID = row.ID //源单ID
               this.form.cSourceBillNo = row.cCode //源单单号
               this.form.cSourceBillEntryID = row.Autoid //源单表体ID
 
+              // if (this.control.usePos) {
+              //   this.form.cPosName = ''
+              // } else {
               this.form.cBarcode = ''
-              this.form.iQuantity = ''
-              this.curEle = 'ele_iQuantity'
+              // }
+              // this.curEle = 'ele_iQuantity'
+
+              this.onSubmit()
             } else {
               this.form.cBarcode = ''
               this.curEle = 'ele_cBarcode'
@@ -640,9 +698,7 @@ export default {
           this.form.cBarcode = ''
           this.curEle = 'ele_cBarcode'
         })
-        .finally(() => {
-          this.setFocus()
-        })
+        .finally(() => {})
     },
     inputQuantity() {
       if (this.form.iQuantity == '') {
@@ -675,21 +731,83 @@ export default {
       this.onSubmit()
     },
     clearForm() {
-      for (const key in this.form) {
-        this.form[key] = ''
-      }
-      this.control.useBatch = true
-      this.control.useQuality = true
-      this.control.groupType = 1
-      if (this.control.usePos) {
-        this.curEle = 'ele_cPosName'
-      } else {
-        this.curEle = 'ele_cBarcode'
-      }
+      // for (const key in this.form) {
+      //   if (this.$store.getters.numProps.includes(key)) {
+      //     this.form[key] = 0
+      //   } else {
+      //     this.form[key] = ''
+      //   }
+      // }
+      this.form.cBarcode = ''
+
+      // this.control.useBatch = false
+      // this.control.useQuality = false
+      // this.control.groupType = 1
+      // if (this.control.usePos) {
+      //   this.curEle = 'ele_cPosName'
+      // } else {
+      //   this.curEle = 'ele_cBarcode'
+      // }
       this.setFocus()
+    },
+    onFocus1(e) {
+      window.localStorage.setItem('curEle', e)
+      const container = document.querySelector('.app-container')
+      container.style.paddingBottom = '80px'
+      const dom = document.querySelector('.inputForm')
+      dom.style.height = '140px'
+      dom.style.overflow = 'auto'
+      const domTarget = document.querySelector('#ele_iQuantity')
+      if (domTarget != void 0) {
+        domTarget.scrollIntoView(true)
+      }
+    },
+    onBlur() {
+      const dom = document.querySelector('.inputForm')
+      dom.style.height = ''
+      dom.style.overflow = ''
+
+      const container = document.querySelector('.app-container')
+      container.style.paddingBottom = ''
+
+      setTimeout(() => {
+        var fdom = window.localStorage.getItem('curEle')
+        const domTarget = document.querySelector('#' + fdom)
+        if (domTarget != void 0) {
+          domTarget.scrollIntoView(true)
+        }
+      }, 100)
     },
     onFocus(e) {
       window.localStorage.setItem('curEle', e)
+    },
+    checkPlan() {
+      const l1 = this.cacheList
+        .filter(f => {
+          return f.cInvCode == this.form.cInvCode // && f.cBatch == this.form.cBatch
+        })
+        .map(m => m.iQuantity)
+
+      const total = floatAdd(
+        l1.reduce((sum, item) => {
+          return floatAdd(sum, item)
+        }, 0),
+        this.form.iQuantity
+      )
+
+      const source = this.sourceList
+        .filter(f => {
+          return f.cInvCode == this.form.cInvCode // && f.cBatch == this.form.cBatch
+        })
+        .map(m => m.iQuantity)
+      const source_total = floatAdd(
+        source.reduce((sum, item) => {
+          return floatAdd(sum, item)
+        }, 0),
+        0
+      )
+
+      return floatSub(source_total, total) >= 0
     },
     checkStock() {
       const l1 = this.cacheList
@@ -735,8 +853,19 @@ export default {
     this.queryForm = Object.assign({}, this.$route.query)
   },
   mounted() {
-    this.onLoad()
+    if (window.iQuantityFocus == void 0) {
+      window.iQuantityFocus = () => {
+        this.onFocus1('ele_iQuantity')
+      }
+    }
 
+    if (window.iQuantityBlure == void 0) {
+      window.iQuantityBlure = () => {
+        this.onBlur()
+      }
+    }
+
+    this.onLoad()
     setTimeout(() => {
       getWarehouse({})
         .then(({ Data }) => {
@@ -772,7 +901,7 @@ export default {
     }, 100)
 
     setTimeout(() => {
-      getRdStyle({ cFilter: 'bRdFlag=' + this.queryForm.bRob })
+      getRdStyle({ cFilter: 'bRdFlag=0' })
         .then(({ Data }) => {
           this.sources.rdList = Data
           if (Data.length > 0) {
@@ -785,6 +914,11 @@ export default {
         })
         .catch(err => {})
     }, 200)
+  },
+  beforeRouteLeave(to, from, next) {
+    delete window.iQuantityFocus
+    delete window.iQuantityBlure
+    next()
   }
 }
 </script>
@@ -792,11 +926,21 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-top: 25px;
+    margin-bottom: 20px;
     display: flex;
     justify-content: space-around;
     .btn {
       width: 30%;
+    }
+  }
+  .postForm {
+    .van-cell {
+      padding: 8px 10px;
+      ::v-deep .van-cell__title {
+        font-size: 15px;
+        color: #333;
+        width: 70px;
+      }
     }
   }
   .list0,

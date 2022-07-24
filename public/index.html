@@ -33,6 +33,17 @@
         var dom = window.localStorage.getItem('curEle')
         return Number(dom)
       }
+      function keyboard(state) {
+        var dom = window.localStorage.getItem('curEle')
+        if (!state) {
+          window.iQuantityBlure()
+        } else {
+          console.log('====' + dom)
+          if (dom == 'ele_iQuantity') {
+            window.iQuantityFocus()
+          }
+        }
+      }
     </script>
     <noscript>
       <strong

@@ -2,7 +2,7 @@
   <van-popup v-model="show" position="bottom" :style="{ height: '50%' }">
     <van-picker
       show-toolbar
-      title="选择入库方式"
+      :title="title"
       :columns="columns"
       :default-index="defaulIndex"
       @cancel="cancel"
@@ -24,7 +24,8 @@ export default {
   },
   data() {
     return {
-      show: false
+      show: false,
+      flag: 1
     }
   },
   computed: {
@@ -32,6 +33,13 @@ export default {
       return this.$props.source.map(m => {
         return `${m.cRdCode}||${m.cRdName}`
       })
+    },
+    title() {
+      if (this.flag == '1') {
+        return '选择入库方式'
+      } else if (this.flag == '0') {
+        return '选择出库方式'
+      }
     }
   },
   watch: {
@@ -42,7 +50,10 @@ export default {
     }
   },
   methods: {
-    open() {
+    open(_flag) {
+      if (_flag != void 0) {
+        this.flag = _flag
+      }
       this.show = true
     },
     dismiss() {

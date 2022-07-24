@@ -55,6 +55,15 @@
               <li style="padding: 2px">客户：{{ source.cCusCode }}||{{ source.cCusName }}</li>
             </ul>
           </van-list>
+          <van-button class="reload">
+            <van-image
+              width="32"
+              height="32"
+              fit="scale-down"
+              class="img"
+              :src="require('../../../static/icon_refresh.png')"
+            />
+          </van-button>
         </div>
       </div>
     </van-form>
@@ -133,7 +142,7 @@ export default {
           {},
           { dBeginDate: this.startDateStr, dEndDate: this.endDateStr, FRob: this.rob },
           {
-            cFilter: this.keyword == '' ? '' : JSON.stringify({ cCode: this.keyword })
+            cFilter: this.keyword
           }
         )
       )
@@ -201,6 +210,26 @@ export default {
     .list {
       height: calc(100vh - 90px);
       overflow: scroll;
+      .reload {
+        bottom: 55px;
+        overflow: hidden;
+        position: fixed;
+        right: 50px;
+        width: 54px;
+        height: 54px;
+        border-radius: 54px;
+        z-index: 999;
+        background-color: #008577;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .img {
+          display: block;
+          float: right;
+          outline: 0 none;
+          text-indent: -9999em;
+        }
+      }
     }
   }
 }

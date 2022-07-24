@@ -25,6 +25,7 @@ service.interceptors.request.use(
       'Content-Type': 'multipart/form-data'
     }
     const { accountId, key, loginUserId, pwd, accountDate } = store.getters
+
     config.data = {
       MethodName: config.url,
       JSON: JSON.stringify(
@@ -36,6 +37,15 @@ service.interceptors.request.use(
         })
       ),
       AccID: accountId
+    }
+    if (process.env.VUE_APP_ENV == 'production') {
+      config.baseURL =
+        'http://' +
+        MyLStorage.get('model').server +
+        ':' +
+        MyLStorage.get('model').port +
+        '/' +
+        MyLStorage.get('model').path
     }
     return config
   },

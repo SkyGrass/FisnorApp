@@ -3,7 +3,7 @@
     <van-tabs v-model="active" color="#008577">
       <van-tab title="扫描页">
         <div class="list0" id="list0">
-          <van-form label-width="70px" ref="postForm">
+          <div ref="postForm" class="postForm inputForm">
             <van-field
               type="text"
               name="cBarcode"
@@ -12,9 +12,11 @@
               v-model="form.cBarcode"
               autocomplete="off"
               placeholder="扫描或录入箱号条码"
-              @focus="onFocus(0)"
+              id="ele_cBarcode"
+              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
-            ></van-field>
+            >
+            </van-field>
             <van-field
               name="cInvCode"
               label="存货编码"
@@ -57,19 +59,20 @@
             ></van-field>
 
             <van-field
-              type="digit"
+              type="number"
               name="iQuantity"
               label="数量"
               ref="ele_iQuantity"
               v-model="form.iQuantity"
-              class="iQuantity"
-              @focus="onFocus(2)"
+              id="ele_iQuantity"
+              @focus="onFocus1('ele_iQuantity')"
+              @blur="onBlur"
               @keyup.enter="inputQuantity"
             ></van-field>
-          </van-form>
+          </div>
 
           <div class="btns">
-            <van-button class="btn" size="small" @click="doClear">取消</van-button>
+            <van-button class="btn" size="small" @click="doClear">清空</van-button>
             <van-button class="btn" size="small" color="#008577" type="info" @click="onSubmit" :disabled="forbiddenSub"
               >确定</van-button
             >
@@ -229,18 +232,18 @@ export default {
       if (this.curEle != '') {
         setTimeout(() => {
           this.$refs[this.curEle].focus()
-          if (window.android) {
-            if (this.curEle != 'ele_iQuantity' || flag) {
-              android.HideSoftKeyboard()
-            }
-          }
-          setTimeout(() => {
-            if (window.android) {
-              if (this.curEle != 'ele_iQuantity') {
-                android.HideSoftKeyboard()
-              }
-            }
-          }, 50)
+          // if (window.android) {
+          //   if (this.curEle != 'ele_iQuantity' || flag) {
+          //     android.HideSoftKeyboard()
+          //   }
+          // }
+          // setTimeout(() => {
+          //   if (window.android) {
+          //     if (this.curEle != 'ele_iQuantity') {
+          //       android.HideSoftKeyboard()
+          //     }
+          //   }
+          // }, 50)
         }, 10)
       }
     },
@@ -298,6 +301,19 @@ export default {
         })
     },
     inputQuantity() {
+      if (this.form.cBoxNO == '') {
+        this.form.iQuantity = ''
+        this.form.cBarcode = ''
+        this.curEle = 'ele_cBarcode'
+        return this.$toast({
+          type: 'fail',
+          message: '请先录入或者扫描箱号条码',
+          onOpened: () => {
+            this.setFocus(true)
+          }
+        })
+      }
+
       if (this.form.iQuantity == '') {
         this.form.iQuantity = ''
         this.curEle = 'ele_iQuantity'
@@ -318,6 +334,34 @@ export default {
       }
       this.curEle = 'ele_cBarcode'
       this.setFocus()
+    },
+    onFocus1(e) {
+      window.localStorage.setItem('curEle', e)
+      const container = document.querySelector('.app-container')
+      container.style.paddingBottom = '70px'
+      const dom = document.querySelector('.inputForm')
+      dom.style.height = '280px'
+      dom.style.overflow = 'auto'
+      const domTarget = document.querySelector('#ele_iQuantity')
+      if (domTarget != void 0) {
+        domTarget.scrollIntoView(true)
+      }
+    },
+    onBlur() {
+      const dom = document.querySelector('.inputForm')
+      dom.style.height = ''
+      dom.style.overflow = ''
+
+      const container = document.querySelector('.app-container')
+      container.style.paddingBottom = ''
+
+      setTimeout(() => {
+        var fdom = window.localStorage.getItem('curEle')
+        const domTarget = document.querySelector('#' + fdom)
+        if (domTarget != void 0) {
+          domTarget.scrollIntoView(true)
+        }
+      }, 100)
     },
     onFocus(e) {
       window.localStorage.setItem('curEle', e)
@@ -351,8 +395,25 @@ export default {
     this.queryForm = Object.assign({}, this.$route.query)
   },
   mounted() {
+    if (window.iQuantityFocus == void 0) {
+      window.iQuantityFocus = () => {
+        this.onFocus1('ele_iQuantity')
+      }
+    }
+
+    if (window.iQuantityBlure == void 0) {
+      window.iQuantityBlure = () => {
+        this.onBlur()
+      }
+    }
+
     this.curEle = 'ele_cBarcode'
-    this.setFocus();
+    this.setFocus()
+  },
+  beforeRouteLeave(to, from, next) {
+    delete window.iQuantityFocus
+    delete window.iQuantityBlure
+    next()
   }
 }
 </script>
@@ -360,11 +421,20 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-top: 25px;
     display: flex;
     justify-content: space-around;
     .btn {
       width: 30%;
+    }
+  }
+  .postForm {
+    .van-cell {
+      padding: 8px 10px;
+      ::v-deep .van-cell__title {
+        font-size: 15px;
+        color: #333;
+        width: 70px;
+      }
     }
   }
   .list0,

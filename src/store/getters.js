@@ -13,6 +13,8 @@ const getters = {
 
   addRoutes: state => state.app.menus,
 
-  wareHouseList: state => state.base.wareHouseList
+  wareHouseList: state => state.base.wareHouseList,
+
+  numProps: state => ['iChangRate', 'iNum']
 }
 export default getters

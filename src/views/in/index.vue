@@ -1,4 +1,4 @@
-<template lang="">
+<template>
   <div class="container">
     <van-form @submit="onSubmit" label-width="50px">
       <div class="top">
@@ -45,7 +45,7 @@
             <ul
               style="padding: 5px; font-size: 14px"
               class="van-hairline--bottom"
-              v-for="(source, index) in sourceList"
+              v-for="source in sourceList"
               :key="source.ID"
               :source="source"
               @click="onChoose(source)"
@@ -55,11 +55,18 @@
               <li style="padding: 2px">供应商：{{ source.cVenCode }}||{{ source.cVenName }}</li>
             </ul>
           </van-list>
+          <van-button class="reload">
+            <van-image
+              width="32"
+              height="32"
+              fit="scale-down"
+              class="img"
+              :src="require('../../../static/icon_refresh.png')"
+            />
+          </van-button>
         </div>
       </div>
     </van-form>
-    <!-- <van-calendar v-model="show1" /> -->
-    <!-- <van-calendar v-model="show2" @confirm="onConfirm2" /> -->
     <van-popup v-model="show1" position="bottom" :style="{ height: '50%' }">
       <van-datetime-picker
         v-model="form.dBeginDate"
@@ -133,7 +140,7 @@ export default {
           {},
           { dBeginDate: this.startDateStr, dEndDate: this.endDateStr, FRob: this.rob },
           {
-            cFilter: this.keyword == '' ? '' : JSON.stringify({ cCode: this.keyword })
+            cFilter: this.keyword
           }
         )
       )
@@ -201,6 +208,26 @@ export default {
     .list {
       height: calc(100vh - 90px);
       overflow: scroll;
+      .reload {
+        bottom: 55px;
+        overflow: hidden;
+        position: fixed;
+        right: 50px;
+        width: 54px;
+        height: 54px;
+        border-radius: 54px;
+        z-index: 999;
+        background-color: #008577;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .img {
+          display: block;
+          float: right;
+          outline: 0 none;
+          text-indent: -9999em;
+        }
+      }
     }
   }
 }

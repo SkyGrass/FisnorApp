@@ -3,12 +3,12 @@
     <van-form>
       <van-field
         name="cPosName"
-        label="仓位"
+        label="货位"
         id="ele_cPosName"
         ref="ele_cPosName"
         v-model="form.cPosName"
         autocomplete="off"
-        placeholder="扫描或录入仓位"
+        placeholder="扫描或录入货位"
         v-show="control.usePos"
         @keyup.enter="queryPos"
       ></van-field>
@@ -84,7 +84,7 @@
       ></van-field>
       <van-field
         name="iStockQuantity"
-        label="库存件数"
+        label="库存数量"
         ref="ele_iStockQuantity"
         v-model="form.iStockQuantity"
         v-show="showStock"

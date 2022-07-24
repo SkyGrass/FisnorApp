@@ -1,4 +1,4 @@
-<template lang="">
+<template>
   <div class="container">
     <van-tabs v-model="active" color="#008577">
       <van-tab title="源单页">
@@ -75,7 +75,7 @@
           </template>
         </van-field>
         <div style="margin: 5px; text-align: right">
-          <van-button style="margin-right: 20px" @click="show = false">取消</van-button>
+          <van-button style="margin-right: 20px" @click="show = false">清空</van-button>
           <van-button color="#008577" type="info" @click="onSubmit">确定</van-button>
         </div>
       </van-form>
@@ -108,7 +108,7 @@ export default {
   methods: {
     onLoad() {
       this.list = []
-      getPuArrival({ cFilter: "ID='" + this.queryForm.ID + "'", FROB: 1 })
+      getPuArrival({ cFilter: this.queryForm.ID, FROB: 1 })
         .then(({ Data }) => {
           this.list = Data
         })

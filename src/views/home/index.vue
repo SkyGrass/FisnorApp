@@ -28,7 +28,6 @@
 <script>
 import { getMenu } from '@/api/home'
 
-import { getWarehouse } from '@/api/base'
 import redblue from '@/components/redblue'
 export default {
   name: `home`,
