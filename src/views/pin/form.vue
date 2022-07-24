@@ -354,6 +354,7 @@ export default {
           message: '当前箱号已扫描!',
           onOpened: () => {
             this.form.cBarcode = ''
+            this.curEle = 'ele_cBarcode'
             this.setFocus()
           }
         })
@@ -554,6 +555,7 @@ export default {
           message: '当前箱号已扫描!',
           onOpened: () => {
             this.form.cBarcode = ''
+            this.curEle = 'ele_cBarcode'
             this.setFocus()
           }
         })

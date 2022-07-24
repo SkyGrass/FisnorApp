@@ -263,7 +263,7 @@ export default {
         cDepCode: '',
         cDepName: '',
         cMemo: '',
-        cSource: '采购到货单',
+        cSource: '发货单',
         FROB: '1'
       },
       sourceList: [],
@@ -350,18 +350,6 @@ export default {
       this.clearForm()
     },
     onSubmit() {
-      // 红字检查库存
-      if (!this.checkStock()) {
-        this.curEle = 'ele_cBarcode'
-        return this.$toast({
-          type: 'fail',
-          message: '当前库存量不够!',
-          onOpened: () => {
-            this.setFocus(true)
-          }
-        })
-      }
-
       const exist = this.cacheList.filter(f => {
         return f.cBoxNO == this.form.cBoxNO
       })
@@ -371,7 +359,20 @@ export default {
           message: '当前箱号已扫描!',
           onOpened: () => {
             this.form.cBarcode = ''
+            this.curEle = 'ele_cBarcode'
             this.setFocus()
+          }
+        })
+      }
+
+      // 红字检查库存
+      if (!this.checkStock()) {
+        this.curEle = 'ele_cBarcode'
+        return this.$toast({
+          type: 'fail',
+          message: '当前库存量不够!',
+          onOpened: () => {
+            this.setFocus(true)
           }
         })
       }
@@ -403,7 +404,7 @@ export default {
           const form = Object.assign({}, this.headForm, {
             cSign: this.cSign,
             FROB: this.queryForm.bRob,
-            cVenCode: this.queryForm.cVenCode,
+            cCusCode: this.queryForm.cCusCode,
             cAcc_Id: accountId
           })
           saveProStockOut(
@@ -414,7 +415,7 @@ export default {
                   cSign: m.cSign,
                   FROB: m.FROB,
                   cAcc_Id: m.cAcc_Id,
-
+                  cCusCode: m.cCusCode,
                   cWhCode: m.cWhCode,
                   cRdCode: m.cRdCode,
                   cDepCode: m.cDepCode,
@@ -567,12 +568,13 @@ export default {
           message: '请先扫描箱号条码',
           onOpened: () => {
             this.form.cBarcode = ''
+            this.curEle = 'ele_cBarcode'
             this.setFocus()
           }
         })
       }
       const exist = this.cacheList.filter(f => {
-        return f.cBoxNO == this.form.cBarcode || f.cBoxNO == this.form.cBoxNO
+        return f.cBoxNO == this.form.cBarcode
       })
       if (exist.length > 0) {
         return this.$toast({
@@ -580,6 +582,7 @@ export default {
           message: '当前箱号已扫描!',
           onOpened: () => {
             this.form.cBarcode = ''
+            this.curEle = 'ele_cBarcode'
             this.setFocus()
           }
         })
