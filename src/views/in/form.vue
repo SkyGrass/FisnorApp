@@ -164,9 +164,15 @@
           </div>
           <div class="btns">
             <van-button class="btn" size="small" @click="doClear">清空</van-button>
-            <van-button class="btn" size="small" color="#008577" type="info" @click="inputQuantity" :disabled="forbiddenSub"
+            <!-- <van-button
+              class="btn"
+              size="small"
+              color="#008577"
+              type="info"
+              @click="inputQuantity"
+              :disabled="forbiddenSub"
               >确定</van-button
-            >
+            > -->
           </div>
         </div>
       </van-tab>
@@ -258,6 +264,7 @@ export default {
   name: `in_form`,
   components: { warehouse, deptpartment, rd },
   data() {
+    this.confirm = 0
     return {
       active: 0,
       queryForm: {},
@@ -407,7 +414,7 @@ export default {
           const { accountId } = this.$store.getters
           const form = Object.assign({}, this.headForm, {
             cSign: this.cSign,
-            FROB: this.queryForm.bRob,
+            FROB: this.queryForm.redblue == '1' ? '1' : '-1',
             cVenCode: this.queryForm.cVenCode,
             cAcc_Id: accountId
           })
@@ -880,7 +887,7 @@ export default {
     }, 100)
 
     setTimeout(() => {
-      getRdStyle({ cFilter: 'bRdFlag=' + this.queryForm.bRob })
+      getRdStyle({ cFilter: 'bRdFlag=1' })
         .then(({ Data }) => {
           this.sources.rdList = Data
           if (Data.length > 0) {
@@ -898,9 +905,30 @@ export default {
     }, 200)
   },
   beforeRouteLeave(to, from, next) {
-    delete window.iQuantityFocus
-    delete window.iQuantityBlure
-    next()
+    if (this.confirm != 0) {
+      next(false)
+    }
+    if (this.cacheList.length <= 0) {
+      delete window.iQuantityFocus
+      delete window.iQuantityBlure
+      next()
+    } else {
+      setTimeout(() => {
+        this.$dialog
+          .confirm({
+            title: '提示',
+            message: '您确定要退出当前功能吗?'
+          })
+          .then(() => {
+            delete window.iQuantityFocus
+            delete window.iQuantityBlure
+            next()
+          })
+          .catch(() => {
+            next(false)
+          })
+      }, 200)
+    }
   }
 }
 </script>
@@ -908,11 +936,12 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-bottom: 20px;
     display: flex;
+    margin-top: 3px;
+    margin-bottom: 20px;
     justify-content: space-around;
     .btn {
-      width: 30%;
+      width: 50%;
     }
   }
   .postForm {

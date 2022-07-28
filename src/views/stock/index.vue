@@ -338,8 +338,9 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-top: 25px;
     display: flex;
+    margin-top: 3px;
+    margin-bottom: 20px;
     justify-content: space-around;
     .btn {
       width: 30%;

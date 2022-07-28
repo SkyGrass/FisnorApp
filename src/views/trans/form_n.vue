@@ -191,7 +191,7 @@
           </div>
           <div class="btns">
             <van-button class="btn" size="small" @click="doClear">清空</van-button>
-            <van-button
+            <!-- <van-button
               class="btn"
               size="small"
               color="#008577"
@@ -199,7 +199,7 @@
               @click="inputQuantity"
               :disabled="forbiddenSub"
               >确定</van-button
-            >
+            > -->
           </div>
         </div>
       </van-tab>
@@ -253,8 +253,8 @@
       @choose="pickDeptpartmentOut"
       @cancel="cancelPicker"
     />
-    <rd ref="rdIn" :source="sources.rdList" @choose="pickRdIn" @cancel="cancelPicker" />
-    <rd ref="rdOut" :source="sources.rdList" @choose="pickRdOut" @cancel="cancelPicker" />
+    <rd ref="rdIn" :source="sources.rdListIn" @choose="pickRdIn" @cancel="cancelPicker" />
+    <rd ref="rdOut" :source="sources.rdListOut" @choose="pickRdOut" @cancel="cancelPicker" />
   </div>
 </template>
 <script>
@@ -269,6 +269,7 @@ export default {
   name: `trans_form`,
   components: { warehouse, deptpartment, rd },
   data() {
+    this.confirm = 0
     return {
       active: 0,
       headForm: {
@@ -298,7 +299,8 @@ export default {
       sources: {
         warehouseList: [],
         departmentList: [],
-        rdList: []
+        rdListIn: [],
+        rdListOut: []
       },
       control: {
         usePosIn: false,
@@ -926,7 +928,7 @@ export default {
     setTimeout(() => {
       getRdStyle({ cFilter: 'bRdFlag=1' })
         .then(({ Data }) => {
-          this.sources.rdList = Data
+          this.sources.rdListIn = Data
           if (Data.length > 0) {
             const { cRdCode, cRdName } = Data.filter(f => f.cRdCode == '14')[0]
             this.headForm.cIRdCode = cRdCode
@@ -939,7 +941,7 @@ export default {
     setTimeout(() => {
       getRdStyle({ cFilter: 'bRdFlag=0' })
         .then(({ Data }) => {
-          this.sources.rdList = Data
+          this.sources.rdListOut = Data
           if (Data.length > 0) {
             const { cRdCode, cRdName } = Data.filter(f => f.cRdCode == '24')[0]
 
@@ -951,9 +953,30 @@ export default {
     }, 200)
   },
   beforeRouteLeave(to, from, next) {
-    delete window.iQuantityFocus
-    delete window.iQuantityBlure
-    next()
+    if (this.confirm != 0) {
+      next(false)
+    }
+    if (this.cacheList.length <= 0) {
+      delete window.iQuantityFocus
+      delete window.iQuantityBlure
+      next()
+    } else {
+      setTimeout(() => {
+        this.$dialog
+          .confirm({
+            title: '提示',
+            message: '您确定要退出当前功能吗?'
+          })
+          .then(() => {
+            delete window.iQuantityFocus
+            delete window.iQuantityBlure
+            next()
+          })
+          .catch(() => {
+            next(false)
+          })
+      }, 200)
+    }
   }
 }
 </script>
@@ -961,11 +984,12 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-bottom: 20px;
     display: flex;
+    margin-top: 3px;
+    margin-bottom: 20px;
     justify-content: space-around;
     .btn {
-      width: 30%;
+      width: 50%;
     }
   }
   .postForm {

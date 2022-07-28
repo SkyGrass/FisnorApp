@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="app-container" style="padding-bottom: 50px;">
+    <div class="app-container" style="padding-bottom: 50px">
       <keep-alive>
         <router-view v-if="$route.meta.keepAlive" :key="key"></router-view>
       </keep-alive>
@@ -12,7 +12,6 @@
 </template>
 <script>
 import redblue from '@/components/redblue'
-import { getWarehouse } from './api/base'
 export default {
   name: 'App',
   components: { redblue },

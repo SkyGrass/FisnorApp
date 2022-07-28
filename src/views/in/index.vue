@@ -169,7 +169,8 @@ export default {
       this.$router.push({
         name: 'in_form',
         query: Object.assign({}, row, {
-          bRob: this.rob
+          bRob: this.rob,
+          redblue: this.rob
         })
       })
     }

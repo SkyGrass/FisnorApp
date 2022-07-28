@@ -1,5 +1,5 @@
 <template>
-  <van-popup v-model="show" position="bottom" :style="{ height: '50%' }">
+  <van-popup v-model="show" position="center" :style="{ height: '50%', width: '100%' }">
     <van-picker
       show-toolbar
       title="选择仓库"

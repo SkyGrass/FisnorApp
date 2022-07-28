@@ -89,6 +89,7 @@ import { Toast } from 'vant'
 export default {
   name: `pap_form`,
   data() {
+    this.confirm = 0
     return {
       active: 0,
       queryForm: {},
@@ -186,7 +187,30 @@ export default {
         .catch(e => {})
     }
   },
-  mounted() {}
+  mounted() {},
+  beforeRouteLeave(to, from, next) {
+    console.log(this.confirm)
+    if (this.confirm != 0) {
+      next(false)
+    }
+    if (this.cacheList.length <= 0) {
+      next()
+    } else {
+      setTimeout(() => {
+        this.confirm = this.$dialog
+          .confirm({
+            title: '提示',
+            message: '您确定要退出当前功能吗?'
+          })
+          .then(() => {
+            next()
+          })
+          .catch(() => {
+            next(false)
+          })
+      }, 200)
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

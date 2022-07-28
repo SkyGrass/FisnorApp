@@ -3,7 +3,7 @@
     <van-grid :gutter="10" clickable :column-num="3">
       <van-grid-item class="grid" v-for="menu in menus" :key="menu.id" @click="redirect(menu)">
         <van-image width="64" height="64" fit="cover" :src="menu.icon" />
-        <p>{{ menu.label }}</p>
+        <span>{{ menu.label }}</span>
       </van-grid-item>
     </van-grid>
     <van-empty description="没有配置菜单" v-if="list.length <= 0" />
@@ -70,10 +70,14 @@ export default {
 <style lang="scss" scoped>
 .grid {
   ::v-deep .van-grid-item__content {
+    padding: 3px;
     background-color: inherit;
   }
   ::v-deep .van-grid-item__content:after {
     border: none;
+  }
+  ::v-deep span {
+    font-size: 14px;
   }
 }
 .footer {

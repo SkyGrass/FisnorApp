@@ -173,7 +173,7 @@
 
           <div class="btns">
             <van-button class="btn" size="small" @click="doClear">清空</van-button>
-            <van-button
+            <!-- <van-button
               class="btn"
               size="small"
               color="#008577"
@@ -181,7 +181,7 @@
               @click="inputQuantity"
               :disabled="forbiddenSub"
               >确定</van-button
-            >
+            > -->
           </div>
         </div>
       </van-tab>
@@ -381,7 +381,7 @@ export default {
           const { accountId } = this.$store.getters
           const form = Object.assign({}, this.headForm, {
             cSign: this.cSign,
-            FROB: this.queryForm.redblue,
+            FROB: this.queryForm.redblue == '1' ? '1' : '-1',
             cVenCode: this.queryForm.cVenCode,
             cAcc_Id: accountId
           })
@@ -561,7 +561,12 @@ export default {
         })
       }
 
-      getBox({ FBoxNo: this.form.cBarcode, cWhCode: this.cWhCode, cType: '1' })
+      getBox({
+        FBoxNo: this.form.cBarcode,
+        cWhCode: this.cWhCode,
+        cType: '1',
+        FROB: this.queryForm.redblue == '1' ? '1' : '-1'
+      })
         .then(({ Data }) => {
           if (Data.length > 0) {
             const {
@@ -768,7 +773,7 @@ export default {
     }, 100)
 
     setTimeout(() => {
-      getRdStyle({ cFilter: 'bRdFlag=' + this.queryForm.redblue })
+      getRdStyle({ cFilter: 'bRdFlag=1' })
         .then(({ Data }) => {
           this.sources.rdList = Data
           if (Data.length > 0) {
@@ -788,11 +793,12 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-bottom: 20px;
     display: flex;
+    margin-top: 3px;
+    margin-bottom: 20px;
     justify-content: space-around;
     .btn {
-      width: 30%;
+      width: 50%;
     }
   }
   .postForm {

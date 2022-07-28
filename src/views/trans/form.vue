@@ -132,7 +132,7 @@
           </div>
           <div class="btns">
             <van-button class="btn" size="small" @click="doClear">清空</van-button>
-            <van-button
+            <!-- <van-button
               class="btn"
               size="small"
               color="#008577"
@@ -140,7 +140,7 @@
               @click="inputQuantity"
               :disabled="forbiddenSub"
               >确定</van-button
-            >
+            > -->
           </div>
         </div>
       </van-tab>
@@ -220,6 +220,7 @@ import dayjs from 'dayjs'
 export default {
   name: `trans_form`,
   data() {
+    this.confirm = 0
     return {
       active: 0,
       queryForm: {},
@@ -813,9 +814,30 @@ export default {
     }, 50)
   },
   beforeRouteLeave(to, from, next) {
-    delete window.iQuantityFocus
-    delete window.iQuantityBlure
-    next()
+    if (this.confirm != 0) {
+      next(false)
+    }
+    if (this.cacheList.length <= 0) {
+      delete window.iQuantityFocus
+      delete window.iQuantityBlure
+      next()
+    } else {
+      setTimeout(() => {
+        this.$dialog
+          .confirm({
+            title: '提示',
+            message: '您确定要退出当前功能吗?'
+          })
+          .then(() => {
+            delete window.iQuantityFocus
+            delete window.iQuantityBlure
+            next()
+          })
+          .catch(() => {
+            next(false)
+          })
+      }, 200)
+    }
   }
 }
 </script>
@@ -823,11 +845,12 @@ export default {
 .container {
   height: 100vh;
   .list0 .btns {
-    margin-bottom: 20px;
     display: flex;
+    margin-top: 3px;
+    margin-bottom: 20px;
     justify-content: space-around;
     .btn {
-      width: 30%;
+      width: 50%;
     }
   }
   .postForm {
