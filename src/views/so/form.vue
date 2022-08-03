@@ -49,7 +49,6 @@
               placeholder="扫描或录入货位"
               v-show="control.usePos"
               id="ele_cPosName"
-              @focus="onFocus('ele_cPosName')"
               @keyup.enter="queryPos"
             ></van-field>
 
@@ -62,7 +61,6 @@
               autocomplete="off"
               placeholder="扫描或录入箱号条码"
               id="ele_cBarcode"
-              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
             ></van-field>
             <van-field
@@ -740,55 +738,19 @@ export default {
       this.onSubmit()
     },
     clearForm() {
-      // for (const key in this.form) {
-      //   if (this.$store.getters.numProps.includes(key)) {
-      //     this.form[key] = 0
-      //   } else {
-      //     this.form[key] = ''
-      //   }
-      // }
       this.form.cBarcode = ''
-
-      // this.control.useBatch = false
-      // this.control.useQuality = false
-      // this.control.groupType = 1
-      // if (this.control.usePos) {
-      //   this.curEle = 'ele_cPosName'
-      // } else {
-      //   this.curEle = 'ele_cBarcode'
-      // }
       this.setFocus()
     },
-    onFocus1(e) {
-      window.localStorage.setItem('curEle', e)
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = '80px'
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = '140px'
-      dom.style.overflow = 'auto'
-      const domTarget = document.querySelector('#ele_iQuantity')
-      if (domTarget != void 0) {
-        domTarget.scrollIntoView(true)
-      }
-    },
-    onBlur() {
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = ''
-      dom.style.overflow = ''
-
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = ''
-
-      setTimeout(() => {
-        var fdom = window.localStorage.getItem('curEle')
-        const domTarget = document.querySelector('#' + fdom)
-        if (domTarget != void 0) {
-          domTarget.scrollIntoView(true)
-        }
-      }, 100)
-    },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     },
     checkPlan() {
       const l1 = this.cacheList
@@ -862,19 +824,15 @@ export default {
     this.queryForm = Object.assign({}, this.$route.query)
   },
   mounted() {
-    if (window.iQuantityFocus == void 0) {
-      window.iQuantityFocus = () => {
-        this.onFocus1('ele_iQuantity')
-      }
-    }
-
-    if (window.iQuantityBlure == void 0) {
-      window.iQuantityBlure = () => {
-        this.onBlur()
-      }
-    }
-
     this.onLoad()
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
+      }
+    }
     setTimeout(() => {
       getWarehouse({})
         .then(({ Data }) => {
@@ -926,25 +884,25 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     if (this.confirm != 0) {
+      delete window.keyboardChange
       next(false)
     }
     if (this.cacheList.length <= 0) {
-      delete window.iQuantityFocus
-      delete window.iQuantityBlure
+      delete window.keyboardChange
       next()
     } else {
       setTimeout(() => {
-        this.$dialog
+        this.confirm = this.$dialog
           .confirm({
             title: '提示',
             message: '您确定要退出当前功能吗?'
           })
           .then(() => {
-            delete window.iQuantityFocus
-            delete window.iQuantityBlure
+            delete window.keyboardChange
             next()
           })
           .catch(() => {
+            delete window.keyboardChange
             next(false)
           })
       }, 200)

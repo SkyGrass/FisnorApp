@@ -27,10 +27,9 @@
           label="存货条码"
           ref="ele_cBarcode"
           v-model="form.cBarcode"
-          autocomplete="off"
+          autocomplete="off" 
           placeholder="扫描或录入存货条码"
           id="ele_cBarcode"
-          @focus="onFocus('ele_cBarcode')"
           @keyup.enter="queryInv"
         ></van-field>
         <van-field
@@ -278,7 +277,15 @@ export default {
         })
     },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     }
   },
   computed: {
@@ -331,6 +338,19 @@ export default {
 
     this.curEle = 'ele_cBarcode'
     this.setFocus()
+
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
+      }
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    delete window.keyboardChange
+    next()
   }
 }
 </script>

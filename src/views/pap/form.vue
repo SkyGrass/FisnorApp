@@ -189,7 +189,6 @@ export default {
   },
   mounted() {},
   beforeRouteLeave(to, from, next) {
-    console.log(this.confirm)
     if (this.confirm != 0) {
       next(false)
     }

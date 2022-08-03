@@ -49,7 +49,6 @@
               placeholder="扫描或录入货位"
               v-show="control.usePos"
               id="ele_cPosName"
-              @focus="onFocus('ele_cPosName')"
               @keyup.enter="queryPos"
             >
             </van-field>
@@ -64,7 +63,6 @@
               placeholder="扫描或录入箱号条码"
               clearable
               id="ele_cBarcode"
-              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
             >
             </van-field>
@@ -248,6 +246,7 @@ export default {
   name: `pin_form`,
   components: { warehouse, deptpartment, rd },
   data() {
+    this.confirm = 0
     return {
       active: 0,
       queryForm: {},
@@ -692,7 +691,15 @@ export default {
       this.setFocus()
     },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     },
     checkStock() {
       const l1 = this.cacheList
@@ -738,6 +745,15 @@ export default {
     this.queryForm = Object.assign({}, this.$route.query)
   },
   mounted() {
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
+      }
+    }
+
     setTimeout(() => {
       getWarehouse({})
         .then(({ Data }) => {
@@ -786,6 +802,32 @@ export default {
         })
         .catch(err => {})
     }, 200)
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.confirm != 0) {
+      delete window.keyboardChange
+      next(false)
+    }
+    if (this.cacheList.length <= 0) {
+      delete window.keyboardChange
+      next()
+    } else {
+      setTimeout(() => {
+        this.confirm = this.$dialog
+          .confirm({
+            title: '提示',
+            message: '您确定要退出当前功能吗?'
+          })
+          .then(() => {
+            delete window.keyboardChange
+            next()
+          })
+          .catch(() => {
+            delete window.keyboardChange
+            next(false)
+          })
+      }, 200)
+    }
   }
 }
 </script>

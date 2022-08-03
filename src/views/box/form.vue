@@ -13,7 +13,6 @@
               autocomplete="off"
               placeholder="扫描或录入箱号条码"
               id="ele_cBarcode"
-              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
             >
             </van-field>
@@ -62,11 +61,10 @@
               type="number"
               name="iQuantity"
               label="数量"
+              autocomplete="off"
               ref="ele_iQuantity"
               v-model="form.iQuantity"
               id="ele_iQuantity"
-              @focus="onFocus1('ele_iQuantity')"
-              @blur="onBlur"
               @keyup.enter="inputQuantity"
             ></van-field>
           </div>
@@ -336,36 +334,16 @@ export default {
       this.curEle = 'ele_cBarcode'
       this.setFocus()
     },
-    onFocus1(e) {
-      window.localStorage.setItem('curEle', e)
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = '70px'
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = '280px'
-      dom.style.overflow = 'auto'
-      const domTarget = document.querySelector('#ele_iQuantity')
-      if (domTarget != void 0) {
-        domTarget.scrollIntoView(true)
-      }
-    },
-    onBlur() {
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = ''
-      dom.style.overflow = ''
-
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = ''
-
-      setTimeout(() => {
-        var fdom = window.localStorage.getItem('curEle')
-        const domTarget = document.querySelector('#' + fdom)
-        if (domTarget != void 0) {
-          domTarget.scrollIntoView(true)
-        }
-      }, 100)
-    },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     },
     checkStock() {
       const l1 = this.cacheList
@@ -396,42 +374,38 @@ export default {
     this.queryForm = Object.assign({}, this.$route.query)
   },
   mounted() {
-    if (window.iQuantityFocus == void 0) {
-      window.iQuantityFocus = () => {
-        this.onFocus1('ele_iQuantity')
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
       }
     }
-
-    if (window.iQuantityBlure == void 0) {
-      window.iQuantityBlure = () => {
-        this.onBlur()
-      }
-    }
-
     this.curEle = 'ele_cBarcode'
     this.setFocus()
   },
   beforeRouteLeave(to, from, next) {
     if (this.confirm != 0) {
+      delete window.keyboardChange
       next(false)
     }
     if (this.cacheList.length <= 0) {
-      delete window.iQuantityFocus
-      delete window.iQuantityBlure
+      delete window.keyboardChange
       next()
     } else {
       setTimeout(() => {
-        this.$dialog
+        this.confirm = this.$dialog
           .confirm({
             title: '提示',
             message: '您确定要退出当前功能吗?'
           })
           .then(() => {
-            delete window.iQuantityFocus
-            delete window.iQuantityBlure
+            delete window.keyboardChange
             next()
           })
           .catch(() => {
+            delete window.keyboardChange
             next(false)
           })
       }, 200)
@@ -462,11 +436,11 @@ export default {
   }
   .list0,
   .list {
-    height: calc(100vh - 210px);
+    height: calc(100vh - 50px);
     overflow: scroll;
   }
   .list1 {
-    height: calc(100vh - 260px);
+    height: calc(100vh - 110px);
     overflow: scroll;
   }
   .form {

@@ -15,7 +15,6 @@
               :readonly="!control.usePosIn"
               id="ele_cIPosName"
               v-show="control.usePosIn"
-              @focus="onFocus('ele_cIPosName')"
               @keyup.enter="queryPosIn"
             ></van-field>
             <van-field
@@ -29,7 +28,6 @@
               :readonly="!control.usePosOut"
               id="ele_cOPosName"
               v-show="control.usePosOut"
-              @focus="onFocus('ele_cOPosName')"
               @keyup.enter="queryPosOut"
             ></van-field>
 
@@ -42,7 +40,6 @@
               autocomplete="off"
               placeholder="扫描或录入存货条码"
               id="ele_cBarcode"
-              @focus="onFocus('ele_cBarcode')"
               @keyup.enter="queryInv"
             ></van-field>
             <van-field
@@ -125,8 +122,7 @@
               ref="ele_iQuantity"
               v-model="form.iQuantity"
               id="ele_iQuantity"
-              @focus="onFocus1('ele_iQuantity')"
-              @blur="onBlur"
+              autocomplete="off"
               @keyup.enter="inputQuantity"
             ></van-field>
           </div>
@@ -503,6 +499,11 @@ export default {
           type: 'fail',
           message: '请先扫描货位',
           onOpened: () => {
+            if (this.control.usePosIn && this.form.cIPosCode == '') {
+              this.curEle = 'ele_cIPosName'
+            } else if (this.control.usePosOut && this.form.cOPosCode == '') {
+              this.curEle = 'ele_cOPosName'
+            }
             this.form.cBarcode = ''
             this.setFocus()
           }
@@ -687,36 +688,16 @@ export default {
       }
       this.setFocus()
     },
-    onFocus1(e) {
-      window.localStorage.setItem('curEle', e)
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = '80px'
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = '300px'
-      dom.style.overflow = 'auto'
-      const domTarget = document.querySelector('#ele_iQuantity')
-      if (domTarget != void 0) {
-        domTarget.scrollIntoView(true)
-      }
-    },
-    onBlur() {
-      const dom = document.querySelector('.inputForm')
-      dom.style.height = ''
-      dom.style.overflow = ''
-
-      const container = document.querySelector('.app-container')
-      container.style.paddingBottom = ''
-
-      setTimeout(() => {
-        var fdom = window.localStorage.getItem('curEle')
-        const domTarget = document.querySelector('#' + fdom)
-        if (domTarget != void 0) {
-          domTarget.scrollIntoView(true)
-        }
-      }, 100)
-    },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     },
     checkStock() {
       const l1 = this.cacheList
@@ -778,15 +759,12 @@ export default {
   },
   mounted() {
     this.onLoad()
-    if (window.iQuantityFocus == void 0) {
-      window.iQuantityFocus = () => {
-        this.onFocus1('ele_iQuantity')
-      }
-    }
-
-    if (window.iQuantityBlure == void 0) {
-      window.iQuantityBlure = () => {
-        this.onBlur()
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
       }
     }
     setTimeout(() => {
@@ -815,25 +793,25 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     if (this.confirm != 0) {
+      delete window.keyboardChange
       next(false)
     }
     if (this.cacheList.length <= 0) {
-      delete window.iQuantityFocus
-      delete window.iQuantityBlure
+      delete window.keyboardChange
       next()
     } else {
       setTimeout(() => {
-        this.$dialog
+        this.confirm = this.$dialog
           .confirm({
             title: '提示',
             message: '您确定要退出当前功能吗?'
           })
           .then(() => {
-            delete window.iQuantityFocus
-            delete window.iQuantityBlure
+            delete window.keyboardChange
             next()
           })
           .catch(() => {
+            delete window.keyboardChange
             next(false)
           })
       }, 200)

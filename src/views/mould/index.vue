@@ -11,7 +11,6 @@
           autocomplete="off"
           id="ele_cBarcode"
           placeholder="扫描或录入模具条码"
-          @focus="onFocus('ele_cBarcode')"
           @keyup.enter="queryInv"
         ></van-field>
         <van-field
@@ -228,7 +227,15 @@ export default {
         })
     },
     onFocus(e) {
-      window.localStorage.setItem('curEle', e)
+      var dom = document.activeElement.id
+      this.curEle = dom
+      const domTarget = document.querySelector('#' + dom)
+      if (domTarget != void 0) {
+        setTimeout(function () {
+          domTarget.scrollIntoView(false)
+        }, 300)
+      }
+      window.localStorage.setItem('curEle', dom)
     }
   },
   computed: {
@@ -249,6 +256,18 @@ export default {
   mounted() {
     this.curEle = 'ele_cBarcode'
     this.setFocus()
+    window.keyboardChange = state => {
+      if (state) {
+        if (this.activeElement != '') {
+          this.onFocus()
+        } else {
+        }
+      }
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    delete window.keyboardChange
+    next()
   }
 }
 </script>
